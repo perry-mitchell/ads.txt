@@ -1,6 +1,8 @@
 # ads.txt
 > Ads.txt parser
 
+[![Build Status](https://travis-ci.org/perry-mitchell/ads.txt.svg?branch=master)](https://travis-ci.org/perry-mitchell/ads.txt) [![npm version](https://badge.fury.io/js/ads.txt.svg)](https://www.npmjs.com/package/ads.txt)
+
 Parse ads.txt file contents, according to the [IAB OpenRTB Ads.txt Public Spec](https://iabtechlab.com/wp-content/uploads/2017/09/IABOpenRTB_Ads.txt_Public_Spec_V1-0-1.pdf).
 
 _**Note**: There may be some minor descrepencies between this implementation and the spec, but the `ads.txt` package does aim to be 100% in-line with the spec. Please file an issue if you notice any problems!_
