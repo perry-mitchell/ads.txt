@@ -12,11 +12,10 @@ const DEFAULT_OPTIONS = {
     newLine: "\n"
 };
 const EMPTY_LINE = /^\s*$/;
-const LINE_COMMENT = /#.+$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
 function createDataField(line) {
-    const commentStrippedLine = line.replace(LINE_COMMENT, "");
+    const commentStrippedLine = stripComment(line);
     const [domain, publisherAccountID, accountType, certificateAuthorityID] = commentStrippedLine
         .split(",")
         .map(item => decodeURIComponent(item.trim()));
@@ -33,7 +32,7 @@ function isComment(line) {
 }
 
 function isDataField(line) {
-    const commentStrippedLine = line.replace(LINE_COMMENT, "");
+    const commentStrippedLine = stripComment(line);
     const domainExp = getDomainRegex();
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
@@ -92,6 +91,10 @@ function parseAdsTxt(text, parseOptions = {}) {
         variables,
         fields: dataFields
     };
+}
+
+function stripComment(line) {
+    return line.split("#")[0];
 }
 
 module.exports = {
