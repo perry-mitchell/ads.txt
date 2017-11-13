@@ -36,6 +36,12 @@ describe("parseAdsTxt", function() {
         expect(aValue).to.have.property("certificateAuthorityID").that.is.undefined;
     });
 
+    it("does not throw on empty lines", function() {
+        expect(() => {
+            parseAdsTxt(validAdsTxt, { invalidLineAction: "throw" });
+        }).to.not.throw();
+    });
+
     it("parses lines that include all possible fields", function() {
         const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
         const item = fields.find(field => field.domain === "website.org");

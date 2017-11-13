@@ -11,6 +11,7 @@ const DEFAULT_OPTIONS = {
     invalidLineAction: "filter", // filter/throw
     newLine: "\n"
 };
+const EMPTY_LINE = /^\s*$/;
 const LINE_COMMENT = /#.+$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
@@ -64,7 +65,7 @@ function parseAdsTxt(text, parseOptions = {}) {
     const dataFields = [];
     const variables = {};
     lines.forEach(line => {
-        if (isComment(line)) {
+        if (isComment(line) || EMPTY_LINE.test(line)) {
             return;
         }
         if (isVariableAssignment(line)) {
