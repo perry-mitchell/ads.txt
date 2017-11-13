@@ -51,6 +51,12 @@ describe("parseAdsTxt", function() {
         expect(item).to.have.property("certificateAuthorityID", "fafdf38b16bf6");
     });
 
+    it("Ignores comments at end of lines", function() {
+        const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
+        const item = fields.find(field => field.domain === "my.domain.com");
+        expect(item).to.be.an("object");
+    });
+
     it("parses variables", function() {
         const { variables } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
         expect(variables).to.have.property("CONTACT", "Jane Doe");

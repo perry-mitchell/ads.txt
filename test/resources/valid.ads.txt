@@ -1,5 +1,5 @@
   # some weird line
-my.domain.com, 12345, DIRECT
+my.domain.com, 12345, DIRECT #Kiosked
 website.org, my%20name,RESELLER,fafdf38b16bf6 # this is ignored
 # Some comment
 CONTACT=Jane%20Doe
