@@ -1,0 +1,11 @@
+  # some weird line
+my.domain.com, 12345, DIRECT
+website.org, my%20name,RESELLER,fafdf38b16bf6 # this is ignored
+# Some comment
+CONTACT=Jane%20Doe
+this.is.my-domain.com.au,12345678abncdefdsdsd,DIRECT, 987835fa87e21a11b
+# Below is a variable assignment
+SUBDOMAIN=mysub.domain.com
+testvar=value1
+testvar=value2
+testvar=value3

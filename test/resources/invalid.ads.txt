@@ -1,0 +1,3 @@
+some-website.com,123,RESELLER
+tooshort.com,something
+wrongvalue.org,456,UNKNOWN
