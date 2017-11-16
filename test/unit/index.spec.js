@@ -1,9 +1,83 @@
 const fs = require("fs");
 const path = require("path");
-const { parseAdsTxt } = require("../../source/index.js");
+const { generateAdsTxt, parseAdsTxt } = require("../../source/index.js");
 
 const invalidAdsTxt = fs.readFileSync(path.resolve(__dirname, "../resources/invalid.ads.txt"), "utf8");
 const validAdsTxt = fs.readFileSync(path.resolve(__dirname, "../resources/valid.ads.txt"), "utf8");
+
+describe("generateAdsTxt", function() {
+    it("generates valid lines", function() {
+        const content = generateAdsTxt({
+            fields: [{
+                domain: "test-site.com",
+                publisherAccountID: "abcdef123",
+                accountType: "DIRECT",
+                certificateAuthorityID: "ffffff"
+            }]
+        });
+        expect(content).to.contain("test-site.com, abcdef123, DIRECT, ffffff");
+    });
+
+    it("generates partial lines", function() {
+        const content = generateAdsTxt({
+            fields: [{
+                domain: "test-site.com",
+                publisherAccountID: "abcdef123",
+                accountType: "DIRECT"
+            }]
+        });
+        expect(content).to.contain("test-site.com, abcdef123, DIRECT");
+    });
+
+    it("generates lines with comments", function() {
+        const content = generateAdsTxt({
+            fields: [{
+                domain: "test-site.com",
+                publisherAccountID: "abcdef123",
+                accountType: "DIRECT",
+                certificateAuthorityID: "ffffff",
+                comment: "Some Network"
+            }]
+        });
+        expect(content).to.contain("test-site.com, abcdef123, DIRECT, ffffff # Some Network");
+    });
+
+    it("writes variables (single value)", function() {
+        const content = generateAdsTxt({
+            variables: {
+                CONTACT: "John Doe"
+            }
+        });
+        expect(content).to.contain("CONTACT=John Doe");
+    });
+
+    it("writes variables (multiple values)", function() {
+        const content = generateAdsTxt({
+            variables: {
+                SUBDOMAIN: ["no1.test.com", "no2.test.com"]
+            }
+        });
+        expect(content).to.match(/SUBDOMAIN=no1\.test\.com\nSUBDOMAIN=no2\.test\.com/m);
+    });
+
+    it("supports adding header comments", function() {
+        const content = generateAdsTxt({
+            variables: {
+                CONTACT: "Name"
+            }
+        }, "My\nHeading");
+        expect(content).to.match(/# My\n# Heading\nCONTACT=Name/m);
+    });
+
+    it("supports adding footer comments", function() {
+        const content = generateAdsTxt({
+            variables: {
+                CONTACT: "Name"
+            }
+        }, null, "My\nFooter");
+        expect(content).to.match(/CONTACT=Name\n# My\n# Footer/m);
+    });
+});
 
 describe("parseAdsTxt", function() {
 
@@ -51,10 +125,23 @@ describe("parseAdsTxt", function() {
         expect(item).to.have.property("certificateAuthorityID", "fafdf38b16bf6");
     });
 
-    it("Ignores comments at end of lines", function() {
+    it("strips comments at end of lines", function() {
         const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
         const item = fields.find(field => field.domain === "my.domain.com");
         expect(item).to.be.an("object");
+        expect(item).to.have.property("accountType", "DIRECT");
+    });
+
+    it("provides comments in parsed items", function() {
+        const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
+        const item = fields.find(field => field.domain === "website.org");
+        expect(item).to.have.property("comment", "this is a comment");
+    });
+
+    it("does not add comment property when none exists", function() {
+        const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
+        const item = fields.find(field => field.domain === "example.com");
+        expect(item).to.not.have.property("comment");
     });
 
     it("parses variables", function() {

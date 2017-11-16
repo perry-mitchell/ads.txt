@@ -1,8 +1,9 @@
   # some weird line
 my.domain.com, 12345, DIRECT #Kiosked
-website.org, my%20name,RESELLER,fafdf38b16bf6 # this is ignored
+website.org, my%20name,RESELLER,fafdf38b16bf6 # this is a comment
 # Some comment
 CONTACT=Jane%20Doe
+example.com, 123abc, RESELLER
 this.is.my-domain.com.au,12345678abncdefdsdsd,DIRECT, 987835fa87e21a11b
 # Below is a variable assignment
 SUBDOMAIN=mysub.domain.com

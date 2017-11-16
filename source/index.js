@@ -8,23 +8,105 @@ const AccountType = deepfreeze({
 });
 
 const DEFAULT_OPTIONS = {
-    invalidLineAction: "filter", // filter/throw
-    newLine: "\n"
+    invalidLineAction: "filter" // filter/throw
 };
 const EMPTY_LINE = /^\s*$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
+/**
+ * Ads.txt file manifest
+ * @typedef {Object} AdsTxtManifest
+ * @property {Object} variables - All variables used in the ads.txt
+ * @property {Array.<AdsTxtManifestField>} fields - All fields listed in the ads.txt
+ */
+
+ /**
+  * Ads.txt processed field
+  * @typedef {Object} AdsTxtManifestField
+  * @property {String} domain - The advertiser domain
+  * @property {String} publisherAccountID - The ID of the publisher within the advertiser
+  * @property {String} accountType - The type of account (DIRECT/RESELLER)
+  * @property {String=} certificateAuthorityID - The certificate authority ID for the advertiser
+  * @property {String=} comment - A comment at the end of the ads.txt line
+  */
+
 function createDataField(line) {
-    const commentStrippedLine = stripComment(line);
+    const { main: commentStrippedLine, comment} = stripComment(line);
     const [domain, publisherAccountID, accountType, certificateAuthorityID] = commentStrippedLine
         .split(",")
         .map(item => decodeURIComponent(item.trim()));
-    return {
+    const output = {
         domain,
         publisherAccountID,
         accountType,
         certificateAuthorityID
     };
+    if (comment && comment.length > 0) {
+        output.comment = comment;
+    }
+    return output;
+}
+
+/**
+ * Generate an ads.txt file from a manifest
+ * @param {AdsTxtManifest} manifest The manifest to use
+ * @param {String=} header A header string to attach at the top of the ads.txt file
+ * @param {String=} footer A footer string to attach at the bottom of the ads.txt file
+ * @returns {String} Generated ads.txt content
+ */
+function generateAdsTxt(manifest, header, footer) {
+    const { fields, variables } = manifest;
+    const lines = [
+        ...(fields || []).map(field => generateLineForField(field)),
+        ...Object.keys(variables || {}).map(key => generateLineForVariable(key, manifest.variables[key]))
+    ];
+    if (header && header.length > 0) {
+        lines.unshift(
+            ...header
+                .split("\n")
+                .map(line => `# ${line}`)
+        );
+    }
+    if (footer && footer.length > 0) {
+        lines.push(
+            ...footer
+                .split("\n")
+                .map(line => `# ${line}`)
+        );
+    }
+    return lines.join("\n");
+}
+
+function generateLineForField(field) {
+    const domainExp = getDomainRegex();
+    const { domain, publisherAccountID, accountType, certificateAuthorityID, comment } = field;
+    if (domainExp.test(domain) !== true) {
+        throw new Error(`Failed generating ads.txt line: Invalid domain: ${domain}`);
+    }
+    if (!publisherAccountID) {
+        throw new Error("Failed generating ads.txt line: Invalid or missing publisher account ID");
+    }
+    if (isValidAccountType(accountType) !== true) {
+        throw new Error(`Failed generating ads.txt line: Invalid account type: ${accountType}`);
+    }
+    let line = `${domain}, ${publisherAccountID}, ${accountType}`;
+    if (certificateAuthorityID && certificateAuthorityID.length > 0) {
+        line += `, ${certificateAuthorityID}`;
+    }
+    if (comment && comment.length > 0) {
+        line += ` # ${comment}`;
+    }
+    return line;
+}
+
+function generateLineForVariable(key, value) {
+    if (Array.isArray(value)) {
+        return value.map(single => `${key}=${single}`).join("\n");
+    } else if (typeof value === "string") {
+        return `${key}=${value}`;
+    } else {
+        throw new Error(`Failed generating ads.txt variable line: Invalid variable value: ${value}`);
+    }
 }
 
 function isComment(line) {
@@ -32,7 +114,7 @@ function isComment(line) {
 }
 
 function isDataField(line) {
-    const commentStrippedLine = stripComment(line);
+    const { main: commentStrippedLine } = stripComment(line);
     const domainExp = getDomainRegex();
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
@@ -54,13 +136,19 @@ function isVariableAssignment(line) {
     return VARIABLE_DEFINITION.test(line);
 }
 
+/**
+ * Parse ads.txt data
+ * @param {String} text The ads.txt string
+ * @param {Object=} parseOptions Parser options
+ * @returns {AdsTxtManifest} A processed manifest
+ */
 function parseAdsTxt(text, parseOptions = {}) {
     const options = Object.assign({}, DEFAULT_OPTIONS, parseOptions);
-    const { invalidLineAction, newLine } = options;
+    const { invalidLineAction } = options;
     if (["filter", "throw"].includes(invalidLineAction) !== true) {
         throw new Error(`Invalid option value for 'invalidLineAction' (must be 'filter' or 'throw'): ${invalidLineAction}`);
     }
-    const lines = text.split(newLine);
+    const lines = text.split("\n");
     const dataFields = [];
     const variables = {};
     lines.forEach(line => {
@@ -94,10 +182,15 @@ function parseAdsTxt(text, parseOptions = {}) {
 }
 
 function stripComment(line) {
-    return line.split("#")[0];
+    const [main, ...commentParts] = line.split("#");
+    return {
+        main,
+        comment: commentParts.join("#").trim()
+    };
 }
 
 module.exports = {
     AccountType,
+    generateAdsTxt,
     parseAdsTxt
 };
