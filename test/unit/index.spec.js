@@ -51,10 +51,23 @@ describe("parseAdsTxt", function() {
         expect(item).to.have.property("certificateAuthorityID", "fafdf38b16bf6");
     });
 
-    it("Ignores comments at end of lines", function() {
+    it("strips comments at end of lines", function() {
         const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
         const item = fields.find(field => field.domain === "my.domain.com");
         expect(item).to.be.an("object");
+        expect(item).to.have.property("accountType", "DIRECT");
+    });
+
+    it("provides comments in parsed items", function() {
+        const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
+        const item = fields.find(field => field.domain === "website.org");
+        expect(item).to.have.property("comment", "this is a comment");
+    });
+
+    it("does not add comment property when none exists", function() {
+        const { fields } = parseAdsTxt(validAdsTxt, { invalidLineAction: "filter" });
+        const item = fields.find(field => field.domain === "example.com");
+        expect(item).to.not.have.property("comment");
     });
 
     it("parses variables", function() {

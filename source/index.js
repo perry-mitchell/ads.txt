@@ -15,16 +15,20 @@ const EMPTY_LINE = /^\s*$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
 function createDataField(line) {
-    const commentStrippedLine = stripComment(line);
+    const { main: commentStrippedLine, comment} = stripComment(line);
     const [domain, publisherAccountID, accountType, certificateAuthorityID] = commentStrippedLine
         .split(",")
         .map(item => decodeURIComponent(item.trim()));
-    return {
+    const output = {
         domain,
         publisherAccountID,
         accountType,
         certificateAuthorityID
     };
+    if (comment && comment.length > 0) {
+        output.comment = comment;
+    }
+    return output;
 }
 
 function isComment(line) {
@@ -32,7 +36,7 @@ function isComment(line) {
 }
 
 function isDataField(line) {
-    const commentStrippedLine = stripComment(line);
+    const { main: commentStrippedLine } = stripComment(line);
     const domainExp = getDomainRegex();
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
@@ -94,7 +98,11 @@ function parseAdsTxt(text, parseOptions = {}) {
 }
 
 function stripComment(line) {
-    return line.split("#")[0];
+    const [main, ...commentParts] = line.split("#");
+    return {
+        main,
+        comment: commentParts.join("#").trim()
+    };
 }
 
 module.exports = {
