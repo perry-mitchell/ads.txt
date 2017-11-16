@@ -17,7 +17,18 @@ const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
  * Ads.txt file manifest
  * @typedef {Object} AdsTxtManifest
  * @property {Object} variables - All variables used in the ads.txt
+ * @property {Array.<AdsTxtManifestField>} fields - All fields listed in the ads.txt
  */
+
+ /**
+  * Ads.txt processed field
+  * @typedef {Object} AdsTxtManifestField
+  * @property {String} domain - The advertiser domain
+  * @property {String} publisherAccountID - The ID of the publisher within the advertiser
+  * @property {String} accountType - The type of account (DIRECT/RESELLER)
+  * @property {String=} certificateAuthorityID - The certificate authority ID for the advertiser
+  * @property {String=} comment - A comment at the end of the ads.txt line
+  */
 
 function createDataField(line) {
     const { main: commentStrippedLine, comment} = stripComment(line);
@@ -36,6 +47,13 @@ function createDataField(line) {
     return output;
 }
 
+/**
+ * Generate an ads.txt file from a manifest
+ * @param {AdsTxtManifest} manifest The manifest to use
+ * @param {String=} header A header string to attach at the top of the ads.txt file
+ * @param {String=} footer A footer string to attach at the bottom of the ads.txt file
+ * @returns {String} Generated ads.txt content
+ */
 function generateAdsTxt(manifest, header, footer) {
     const { fields, variables } = manifest;
     const lines = [
@@ -118,6 +136,12 @@ function isVariableAssignment(line) {
     return VARIABLE_DEFINITION.test(line);
 }
 
+/**
+ * Parse ads.txt data
+ * @param {String} text The ads.txt string
+ * @param {Object=} parseOptions Parser options
+ * @returns {AdsTxtManifest} A processed manifest
+ */
 function parseAdsTxt(text, parseOptions = {}) {
     const options = Object.assign({}, DEFAULT_OPTIONS, parseOptions);
     const { invalidLineAction } = options;
