@@ -65,4 +65,3 @@ The `parseAdsText` function takes an options object (`parseAdsTxt(contents, opti
 | Property            | Range              | Default      | Description                                                             |
 |---------------------|--------------------|--------------|-------------------------------------------------------------------------|
 | invalidLineAction   | "filter" / "throw" | "filter"     | Action to take when an invalid line is found. "throw" throws an exception, "filter" removes the line and continues on. |
-| newLine             | `String`           | "\n"         | New line character to use when parsing the file.                        |

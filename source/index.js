@@ -8,11 +8,16 @@ const AccountType = deepfreeze({
 });
 
 const DEFAULT_OPTIONS = {
-    invalidLineAction: "filter", // filter/throw
-    newLine: "\n"
+    invalidLineAction: "filter" // filter/throw
 };
 const EMPTY_LINE = /^\s*$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
+
+/**
+ * Ads.txt file manifest
+ * @typedef {Object} AdsTxtManifest
+ * @property {Object} variables - All variables used in the ads.txt
+ */
 
 function createDataField(line) {
     const { main: commentStrippedLine, comment} = stripComment(line);
@@ -29,6 +34,47 @@ function createDataField(line) {
         output.comment = comment;
     }
     return output;
+}
+
+function generateAdsTxt(manifest, header, footer) {
+    const { fields, variables } = manifest;
+    const lines = [
+        ...(fields || []).map(field => generateLineForField(field)),
+        ...Object.keys(variables || {}).map(key => generateLineForVariable(key, manifest.variables[key]))
+    ];
+    return lines.join("\n");
+}
+
+function generateLineForField(field) {
+    const domainExp = getDomainRegex();
+    const { domain, publisherAccountID, accountType, certificateAuthorityID, comment } = field;
+    if (domainExp.test(domain) !== true) {
+        throw new Error(`Failed generating ads.txt line: Invalid domain: ${domain}`);
+    }
+    if (!publisherAccountID) {
+        throw new Error("Failed generating ads.txt line: Invalid or missing publisher account ID");
+    }
+    if (isValidAccountType(accountType) !== true) {
+        throw new Error(`Failed generating ads.txt line: Invalid account type: ${accountType}`);
+    }
+    let line = `${domain}, ${publisherAccountID}, ${accountType}`;
+    if (certificateAuthorityID && certificateAuthorityID.length > 0) {
+        line += `, ${certificateAuthorityID}`;
+    }
+    if (comment && comment.length > 0) {
+        line += ` # ${comment}`;
+    }
+    return line;
+}
+
+function generateLineForVariable(key, value) {
+    if (Array.isArray(value)) {
+        return value.map(single => `${key}=${single}`).join("\n");
+    } else if (typeof value === "string") {
+        return `${key}=${value}`;
+    } else {
+        throw new Error(`Failed generating ads.txt variable line: Invalid variable value: ${value}`);
+    }
 }
 
 function isComment(line) {
@@ -60,11 +106,11 @@ function isVariableAssignment(line) {
 
 function parseAdsTxt(text, parseOptions = {}) {
     const options = Object.assign({}, DEFAULT_OPTIONS, parseOptions);
-    const { invalidLineAction, newLine } = options;
+    const { invalidLineAction } = options;
     if (["filter", "throw"].includes(invalidLineAction) !== true) {
         throw new Error(`Invalid option value for 'invalidLineAction' (must be 'filter' or 'throw'): ${invalidLineAction}`);
     }
-    const lines = text.split(newLine);
+    const lines = text.split("\n");
     const dataFields = [];
     const variables = {};
     lines.forEach(line => {
@@ -107,5 +153,6 @@ function stripComment(line) {
 
 module.exports = {
     AccountType,
+    generateAdsTxt,
     parseAdsTxt
 };
