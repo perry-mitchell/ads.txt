@@ -69,7 +69,6 @@ Fields can also handle comments, if they are present in a parsed `ads.txt` file.
     "domain": "kargo.com",
     "publisherAccountID": "105",
     "accountType": "DIRECT",
-    "certificateAuthorityID": undefined,
     "comment": "banner"
 }
 ```
