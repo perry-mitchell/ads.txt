@@ -57,7 +57,25 @@ describe("generateAdsTxt", function() {
                 SUBDOMAIN: ["no1.test.com", "no2.test.com"]
             }
         });
-        expect(content).to.match(/SUBDOMAIN=no1\.test\.com\nSUBDOMAIN=no2\.test\.com/gm);
+        expect(content).to.match(/SUBDOMAIN=no1\.test\.com\nSUBDOMAIN=no2\.test\.com/m);
+    });
+
+    it("supports adding header comments", function() {
+        const content = generateAdsTxt({
+            variables: {
+                CONTACT: "Name"
+            }
+        }, "My\nHeading");
+        expect(content).to.match(/# My\n# Heading\nCONTACT=Name/m);
+    });
+
+    it("supports adding footer comments", function() {
+        const content = generateAdsTxt({
+            variables: {
+                CONTACT: "Name"
+            }
+        }, null, "My\nFooter");
+        expect(content).to.match(/CONTACT=Name\n# My\n# Footer/m);
     });
 });
 

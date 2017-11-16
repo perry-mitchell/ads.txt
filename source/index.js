@@ -42,6 +42,20 @@ function generateAdsTxt(manifest, header, footer) {
         ...(fields || []).map(field => generateLineForField(field)),
         ...Object.keys(variables || {}).map(key => generateLineForVariable(key, manifest.variables[key]))
     ];
+    if (header && header.length > 0) {
+        lines.unshift(
+            ...header
+                .split("\n")
+                .map(line => `# ${line}`)
+        );
+    }
+    if (footer && footer.length > 0) {
+        lines.push(
+            ...footer
+                .split("\n")
+                .map(line => `# ${line}`)
+        );
+    }
     return lines.join("\n");
 }
 
