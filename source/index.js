@@ -1,5 +1,4 @@
 const deepfreeze = require("deepfreeze");
-const getDomainRegex = require("domain-regex");
 const objectValues = require("object-values");
 
 const AccountType = deepfreeze({
@@ -12,6 +11,8 @@ const DEFAULT_OPTIONS = {
 };
 const EMPTY_LINE = /^\s*$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
+
+const DOMAIN_EXP = /\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/i;
 
 /**
  * Ads.txt file manifest
@@ -78,9 +79,8 @@ function generateAdsTxt(manifest, header, footer) {
 }
 
 function generateLineForField(field) {
-    const domainExp = getDomainRegex();
     const { domain, publisherAccountID, accountType, certificateAuthorityID, comment } = field;
-    if (domainExp.test(domain) !== true) {
+    if (DOMAIN_EXP.test(domain) !== true) {
         throw new Error(`Failed generating ads.txt line: Invalid domain: ${domain}`);
     }
     if (!publisherAccountID) {
@@ -115,11 +115,10 @@ function isComment(line) {
 
 function isDataField(line) {
     const { main: commentStrippedLine } = stripComment(line);
-    const domainExp = getDomainRegex();
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
         return [
-            domainExp.test(domain),
+          DOMAIN_EXP.test(domain),
             isValidAccountType(accountType)
         ].every(result => result);
     } catch (err) {
@@ -129,7 +128,7 @@ function isDataField(line) {
 }
 
 function isValidAccountType(type) {
-    return objectValues(AccountType).indexOf(type) >= 0;
+    return objectValues(AccountType).indexOf(type.toUpperCase()) >= 0;
 }
 
 function isVariableAssignment(line) {
