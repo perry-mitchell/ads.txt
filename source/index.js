@@ -1,5 +1,6 @@
 const deepfreeze = require("deepfreeze");
 const objectValues = require("object-values");
+const isDomainName = require('is-domain-name');
 
 const AccountType = deepfreeze({
     DIRECT: "DIRECT",
@@ -11,8 +12,6 @@ const DEFAULT_OPTIONS = {
 };
 const EMPTY_LINE = /^\s*$/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
-
-const DOMAIN_EXP = /\b((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}\b/i;
 
 /**
  * Ads.txt file manifest
@@ -80,7 +79,7 @@ function generateAdsTxt(manifest, header, footer) {
 
 function generateLineForField(field) {
     const { domain, publisherAccountID, accountType, certificateAuthorityID, comment } = field;
-    if (DOMAIN_EXP.test(domain) !== true) {
+    if (!isDomainName(domain, false)) {
         throw new Error(`Failed generating ads.txt line: Invalid domain: ${domain}`);
     }
     if (!publisherAccountID) {
@@ -118,7 +117,7 @@ function isDataField(line) {
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
         return [
-          DOMAIN_EXP.test(domain),
+          isDomainName(domain, false),
             isValidAccountType(accountType)
         ].every(result => result);
     } catch (err) {

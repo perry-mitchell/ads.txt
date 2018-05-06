@@ -5,6 +5,7 @@
   "main": "source/index.js",
   "dependencies": {
     "deepfreeze": "^2.0.0",
+    "is-domain-name": "^1.0.1",
     "object-values": "^1.0.0"
   },
   "devDependencies": {
