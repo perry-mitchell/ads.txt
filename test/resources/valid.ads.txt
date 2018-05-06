@@ -10,3 +10,7 @@ SUBDOMAIN=mysub.domain.com
 testvar=value1
 testvar=value2
 testvar=value3
+# Case-insensitive checks
+example.com, 123, ReSeLlEr
+My.DoMaIn.CoM, 123, DiReCt, 123
+YoUr.DoMaIn.CoM, 123, RESELLER, 123
