@@ -79,7 +79,7 @@ function generateAdsTxt(manifest, header, footer) {
 
 function generateLineForField(field) {
     const { domain, publisherAccountID, accountType, certificateAuthorityID, comment } = field;
-    if (!isDomainName(domain, false)) {
+    if (!isDomainName(domain)) {
         throw new Error(`Failed generating ads.txt line: Invalid domain: ${domain}`);
     }
     if (!publisherAccountID) {
@@ -117,7 +117,7 @@ function isDataField(line) {
     try {
         const [domain,, accountType] = commentStrippedLine.split(",").map(item => item.trim());
         return [
-          isDomainName(domain, false),
+          isDomainName(domain),
             isValidAccountType(accountType)
         ].every(result => result);
     } catch (err) {
