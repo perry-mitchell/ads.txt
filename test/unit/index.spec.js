@@ -164,4 +164,9 @@ describe("parseAdsTxt", function() {
         }).to.throw(/Failed parsing/i);
     });
 
+    it("supports splitting lines by both CR & CRLF", function() {
+        const adsTxt = "my.domain.com, 12345, DIRECT #Test\r\nwebsite.org, my%20name,RESELLER,fafdf38b16bf6\ntest.net,555,DIRECT";
+        const { fields } = parseAdsTxt(adsTxt);
+        expect(fields).to.have.length(3);
+    });
 });
