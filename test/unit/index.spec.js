@@ -80,7 +80,6 @@ describe("generateAdsTxt", function() {
 });
 
 describe("parseAdsTxt", function() {
-
     it("parses a valid file without error", function() {
         expect(() => {
             parseAdsTxt(validAdsTxt);
