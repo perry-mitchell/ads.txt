@@ -6,12 +6,11 @@
   "dependencies": {
     "deepfreeze": "^2.0.0",
     "is-domain-name": "^1.0.1",
-    "object-values": "^1.0.0"
+    "object-values": "^2.0.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^4.1.0",
-    "np": "^2.20.1"
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
   },
   "scripts": {
     "pub": "np",
