@@ -1,6 +1,6 @@
 const deepfreeze = require("deepfreeze");
 const objectValues = require("object-values");
-const isDomainName = require('is-domain-name');
+const isDomainName = require("is-domain-name");
 
 const AccountType = deepfreeze({
     DIRECT: "DIRECT",
@@ -11,6 +11,7 @@ const DEFAULT_OPTIONS = {
     invalidLineAction: "filter" // filter/throw
 };
 const EMPTY_LINE = /^\s*$/;
+const NEW_LINE = /\r\n|\n/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
 /**
@@ -146,7 +147,7 @@ function parseAdsTxt(text, parseOptions = {}) {
     if (["filter", "throw"].includes(invalidLineAction) !== true) {
         throw new Error(`Invalid option value for 'invalidLineAction' (must be 'filter' or 'throw'): ${invalidLineAction}`);
     }
-    const lines = text.split("\n");
+    const lines = text.split(NEW_LINE);
     const dataFields = [];
     const variables = {};
     lines.forEach(line => {
