@@ -11,7 +11,7 @@ const DEFAULT_OPTIONS = {
     invalidLineAction: "filter" // filter/throw
 };
 const EMPTY_LINE = /^\s*$/;
-const NEW_LINE = /\r\n|\n/;
+const NEW_LINE = /\r\n|\n|\r/;
 const VARIABLE_DEFINITION = /^([a-zA-Z]+)=(.+)$/;
 
 /**
