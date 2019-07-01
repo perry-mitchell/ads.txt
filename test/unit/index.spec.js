@@ -163,9 +163,21 @@ describe("parseAdsTxt", function() {
         }).to.throw(/Failed parsing/i);
     });
 
-    it("supports splitting lines by both CR & CRLF", function() {
-        const adsTxt = "my.domain.com, 12345, DIRECT #Test\r\nwebsite.org, my%20name,RESELLER,fafdf38b16bf6\ntest.net,555,DIRECT";
+    it("supports splitting lines by CR", function() {
+        const adsTxt = "my.domain.com, 12345, DIRECT #Test\rwebsite.org, my%20name,RESELLER,fafdf38b16bf6";
         const { fields } = parseAdsTxt(adsTxt);
-        expect(fields).to.have.length(3);
+        expect(fields).to.have.length(2);
+    });
+
+    it("supports splitting lines by LF", function() {
+        const adsTxt = "my.domain.com, 12345, DIRECT #Test\nwebsite.org, my%20name,RESELLER,fafdf38b16bf6";
+        const { fields } = parseAdsTxt(adsTxt);
+        expect(fields).to.have.length(2);
+    });
+
+    it("supports splitting lines by CRLF", function() {
+        const adsTxt = "my.domain.com, 12345, DIRECT #Test\r\nwebsite.org, my%20name,RESELLER,fafdf38b16bf6";
+        const { fields } = parseAdsTxt(adsTxt);
+        expect(fields).to.have.length(2);
     });
 });
