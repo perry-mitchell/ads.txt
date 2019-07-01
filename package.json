@@ -1,6 +1,6 @@
 {
   "name": "ads.txt",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Ads.txt parser",
   "main": "source/index.js",
   "dependencies": {
