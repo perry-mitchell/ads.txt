@@ -125,3 +125,7 @@ openx.com, 537153334, DIRECT
 ```
 
 Both `header` and `footer` are optional.
+
+## See Also
+
+ * [Sellers.json](https://github.com/perry-mitchell/sellers.json): `sellers.json` parser, generator and validator
